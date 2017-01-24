@@ -1,6 +1,6 @@
 CXX=g++
 CXXOPTIMIZE= -O2
-CXXFLAGS= -g -Wall -pthread -std=c++0x $(CXXOPTIMIZE)
+CXXFLAGS= -g -Wall -pthread -std=c++11 $(CXXOPTIMIZE)
 SRCFILES = main.cpp server.cpp reply.cpp config.cc config_parser.cc
 
 webserver:
