@@ -1,7 +1,7 @@
 CXX=g++
 CXXOPTIMIZE= -O2
 CXXFLAGS= -g -Wall -pthread -std=c++11
-SRCFILES = server.cpp response.cpp request.cpp request_parser.cpp config.cc config_parser.cc request_handler.cpp echo_handler.cpp file_handler.cpp not_found_handler.cpp status_handler.cpp server_stats.cpp proxy_handler.cpp
+SRCFILES = server.cpp response.cpp request.cpp request_parser.cpp config.cc config_parser.cc request_handler.cpp echo_handler.cpp file_handler.cpp not_found_handler.cpp status_handler.cpp server_stats.cpp proxy_handler.cpp spaceteam_proxy_handler.cpp
 GTEST_DIR = googletest/googletest
 
 all: CXXFLAGS += $(CXXOPTIMIZE)

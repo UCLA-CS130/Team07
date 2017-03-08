@@ -145,7 +145,6 @@ void server::InitHandlers() {
 		auto handler = RequestHandler::CreateByName(path->handler_name);
   		handler->Init(path->token, *(path->child_block_));
 		handlers_[path->token] = handler;
-
 		//inserting handler info to server stats (used for status handler)
 		{		
 			boost::unique_lock<boost::mutex> lock(ServerStats::getInstance().sync_mutex);

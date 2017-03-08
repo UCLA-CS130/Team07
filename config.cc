@@ -16,6 +16,8 @@ const char* PORT_TOKEN = "port";
 const char* PATH_TOKEN = "path";
 const char* FILE_HANDLER_ROOT_TOKEN = "root";
 const char* DEFAULT_TOKEN = "default";
+const char* PROXY_PORT_TOKEN = "proxy_port";
+const char* PROXY_HOST_TOKEN = "host";
 
 ServerConfig::ServerConfig(const std::string& configFilePath) {
 	NginxConfigParser config_parser;
@@ -101,6 +103,16 @@ bool ServerConfig::ParseStatement(std::shared_ptr<NginxConfigStatement> statemen
 		return true;
 	}
 	else if (statement->tokens_[0].compare(FILE_HANDLER_ROOT_TOKEN) == 0)
+	{
+		PathOption* new_option = new PathOption(statement->tokens_[0], statement->tokens_[1]);
+		lastPath->options[statement->tokens_[0]] = new_option;
+	}
+	else if (statement->tokens_[0].compare(PROXY_PORT_TOKEN) == 0)
+	{
+		PathOption* new_option = new PathOption(statement->tokens_[0], statement->tokens_[1]);
+		lastPath->options[statement->tokens_[0]] = new_option;
+	}
+	else if (statement->tokens_[0].compare(PROXY_HOST_TOKEN) == 0)
 	{
 		PathOption* new_option = new PathOption(statement->tokens_[0], statement->tokens_[1]);
 		lastPath->options[statement->tokens_[0]] = new_option;
