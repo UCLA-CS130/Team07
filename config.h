@@ -16,6 +16,8 @@ extern const int DEFAULT_PORT;
 extern const char* PORT_TOKEN;
 extern const char* PATH_TOKEN;
 extern const char* FILE_HANDLER_ROOT_TOKEN;
+extern const char* PROXY_PORT_TOKEN;
+extern const char* PROXY_HOST_TOKEN;
 
 class InvalidConfigException: public std::runtime_error
 {
