@@ -1,16 +1,20 @@
 #include "gtest/gtest.h"
 #include "gmock/gmock.h"
 #include "config_parser.h"
-#include "request_handler.h"
+#include "request_handler.hpp"
+#include "spaceteam_proxy_handler.hpp"
+
+namespace http {
+namespace server {
 
 class MockNginxConfigParser : public NginxConfigParser {};
 class MockNginxConfig : public NginxConfig {};
 
-class ProxyHandlerTest : public ::testing::Test {
+class SpaceteamProxyHandlerTest : public ::testing::Test {
  protected:
-	ProxyHandlerTest() {
+	void ProxyHandlerTest() {
 		const std::string uri_prefix = "/";
-		ParseString("host www.google.com; port 80;");
+		ParseString("host www.google.com; proxy_port 80;");
 		status_ = proxy_handler_.Init(uri_prefix, config_);
 		request_ = Request::Parse(TEST_BUFFER);
 	}
@@ -22,7 +26,7 @@ class ProxyHandlerTest : public ::testing::Test {
 	MockNginxConfigParser parser_;
 	MockNginxConfig config_;
 
-	Handler_Proxy proxy_handler_;
+	SpaceteamProxyHandler proxy_handler_;
 	
 	const std::string TEST_BUFFER = "GET / HTTP/1.1\r\n\r\n";
 	RequestHandler::Status status_;
@@ -30,14 +34,17 @@ class ProxyHandlerTest : public ::testing::Test {
 	Response response_;
 };
 
-TEST_F(ProxyHandlerTest, InitTest) {
-	EXPECT_EQ(status_, RequestHandler::Status::OK);
+TEST_F(SpaceteamProxyHandlerTest, InitTest) {
+	EXPECT_EQ(status_, RequestHandler::OK);
 }
 
-TEST_F(ProxyHandlerTest, NullResponse) {
-	EXPECT_EQ(proxy_handler_.HandleRequest(*request_, nullptr), RequestHandler::Status::ERROR);
+TEST_F(SpaceteamProxyHandlerTest, NullResponse) {
+	EXPECT_EQ(proxy_handler_.HandleRequest(*request_, nullptr), RequestHandler::bad_request);
 }
 
-TEST_F(ProxyHandlerTest, HandleProperRequestTest) {
-	EXPECT_EQ(proxy_handler_.HandleRequest(*request_, &response_), RequestHandler::Status::OK);
+TEST_F(SpaceteamProxyHandlerTest, HandleProperRequestTest) {
+	EXPECT_EQ(proxy_handler_.HandleRequest(*request_, &response_), RequestHandler::OK);
 }
+
+} // namespace server
+} // namespace http
