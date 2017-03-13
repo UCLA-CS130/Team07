@@ -22,11 +22,21 @@ namespace http {
 namespace server { 
 
 // HTTP RESPONSE/REQUEST WRITE/READ RELATED FUNCTIONS
-connection::connection(boost::asio::ip::tcp::socket socket, boost::asio::io_service* io_service, boost::asio::ssl::context* context)
+connection::connection(boost::asio::ip::tcp::socket socket, boost::asio::io_service&io_service,
+		boost::asio::ssl::context&context, bool isHttps)
 	//TODO: fix nullptrs
-	: socket_(std::move(socket))
+ 	: socket_(std::move(socket))
 {
-	//paths_ = nullptr;
+	ssl_socket_ = new HTTPS(io_service, context);
+	isHttps_ = isHttps;
+	//ssl_socket_.lowest_layer().connect({ {}, 1238 }); 
+}
+
+connection::connection(boost::asio::ip::tcp::socket socket)
+	//TODO: fix nullptrs
+ 	: socket_(std::move(socket))
+{
+	//ssl_socket_.lowest_layer().connect({ {}, 1238 }); 
 }
 
 //connection::connection(boost::asio::ip::tcp::socket socket, Path* paths): socket_(std::move(socket)), paths_(paths)
@@ -45,15 +55,12 @@ void connection::start() {
 
 void connection::stop() {
 	socket_.close();
+	//delete(this);
 }
 
-void connection::do_read() {
-	auto self(shared_from_this());
-  socket_.async_read_some(boost::asio::buffer(buffer_),
-	//TODO: inline specification
-      [this, self](boost::system::error_code ec, std::size_t bytes)
-      {
-        request_ = Request::Parse(buffer_.data());
+void connection::handle_read(boost::system::error_code ec, std::size_t bytes)
+{
+	request_ = Request::Parse(buffer_.data());
         std::string uri = request_->uri();
 	std::string cur_prefix = uri;
         
@@ -96,28 +103,42 @@ void connection::do_read() {
 		} //lock object destroyed => mutex unlocked
 	}
         do_write();
-      });
+}
+
+void connection::do_read() {
+	//auto self(shared_from_this());
+	if(isHttps_)
+	 	ssl_socket_->async_read_some(boost::asio::buffer(buffer_, 16384),
+					boost::bind(&connection::handle_read, this, boost::asio::placeholders::error, boost::asio::placeholders::bytes_transferred));
+	else
+		socket_.async_read_some(boost::asio::buffer(buffer_),
+					boost::bind(&connection::handle_read, this, boost::asio::placeholders::error, boost::asio::placeholders::bytes_transferred));
 }
 
 void connection::do_write() {
-	auto self(shared_from_this());
+	//auto self(shared_from_this());
 
-	boost::asio::async_write(socket_, response_.to_buffers(),
-	[this, self](boost::system::error_code ec, std::size_t)
-	{
-		if (!ec)
-		{
-			boost::system::error_code ignored_ec;
-			stop();
-		}
-	});
+	if(isHttps_)
+		boost::asio::async_write(*ssl_socket_, response_.to_buffers(),
+					 boost::bind(&connection::handle_write, this, boost::asio::placeholders::error, boost::asio::placeholders::bytes_transferred));
+	else
+		boost::asio::async_write(socket_, response_.to_buffers(),
+					 boost::bind(&connection::handle_write, this, boost::asio::placeholders::error, boost::asio::placeholders::bytes_transferred));
 }
 
+void connection::handle_write(boost::system::error_code ec, std::size_t bytes)
+{
+	if (!ec)
+	{
+		boost::system::error_code ignored_ec;
+		stop();
+	}
+}
 
 // SERVER CONNECTION RELATED FUNCTIONS
 
 server::server(const std::string& sconfig_path)
-  : io_service_(), acceptor_(io_service_), socket_(io_service_), context_(io_service_, boost::asio::ssl::context::sslv23)
+  : io_service_(), acceptor_(io_service_), socket_(io_service_), context_(boost::asio::ssl::context::sslv23)
 {
 	config = new ServerConfig(sconfig_path);
 
@@ -131,18 +152,10 @@ server::server(const std::string& sconfig_path)
 		context_.set_options(boost::asio::ssl::context::default_workarounds
 					| boost::asio::ssl::context::no_sslv2
 					| boost::asio::ssl::context::single_dh_use);
+		context_.set_password_callback(boost::bind(&server::get_password, this));
 		context_.use_certificate_chain_file(config->GetCertFilePath());
 		context_.use_private_key_file(config->GetKeyFilePath(), boost::asio::ssl::context::pem);
-		context_.use_tmp_dh_file("dh512.pem");
-
-		/*if(verifyFile.size() > 0) {
-			context_.load_verify_file(verifyFile);
-			
-			context_.set_verify_mode(boost::asio::ssl::context::default_workarounds
-			| boost::asio::ssl::context::no_sslv2
-			| boost::asio::ssl::context::single_dh_use));
-			set_session_id_context = true;
-		}*/
+		context_.use_tmp_dh_file("dh2048.pem");
 	}
 
 	InitHandlers();
@@ -155,6 +168,10 @@ server::server(const std::string& sconfig_path)
 	acceptor_.listen();
 
 	do_accept();
+}
+
+std::string server::get_password() const{
+    return "";
 }
 
 void server::InitHandlers() {
@@ -186,12 +203,7 @@ server::~server() {
 }
 
 void server::run() {
-	if(set_session_id_context) {
-		session_id_context = std::to_string(config->GetPortNo()) + "localhost";
-		SSL_CTX_set_session_id_context(context_.native_handle(), reinterpret_cast<const unsigned char*>(session_id_context.data()),
-		std::min<size_t>(session_id_context.size(), SSL_MAX_SSL_SESSION_ID_LENGTH));
-    	}
-	
+
 	threads_.clear();
 	for(int c = 1; c < config->GetThreadPoolSize(); c++) {
 		threads_.emplace_back([this]() {
@@ -202,7 +214,7 @@ void server::run() {
 	if(config->GetThreadPoolSize() > 0)
 		io_service_.run();
 	
-
+	
 	for(auto& t: threads_) {
 		t.join();
 	}
@@ -210,42 +222,20 @@ void server::run() {
 }
 
 void server::do_accept() {
-
 	try {
+
 		if(!config->IsHttps())
 		{
+			connection* con = new connection(std::move(socket_));
 			acceptor_.async_accept(socket_,
-			[this](boost::system::error_code ec)
-			{
-				
-				if (!acceptor_.is_open())
-				{
-				  return;
-				}
-
-				if (!ec)
-				{
-					if(config != nullptr)
-					{
-						std::shared_ptr<connection> con = std::make_shared<connection>(std::move(socket_), &io_service_, &context_);
-						con->handlers_ = &handlers_;
-						con->start();
-					}
-				} 
-				else if (ec) 
-				{
-					throw ec;
-				}
-
-				do_accept();
-			});
+			  boost::bind(&server::handle_accept, this, con,
+			    boost::asio::placeholders::error));
 		}
 		else
 		{	
-			auto socket = std::make_shared<HTTPS>(io_service_, context_);
-			
-			acceptor_.async_accept((*socket).lowest_layer(),
-			  boost::bind(&server::https_handle_accept, this, socket, 
+			connection* con = new connection(std::move(socket_), io_service_, context_, config->IsHttps());
+			acceptor_.async_accept(con->ssl_socket_->lowest_layer(),
+			  boost::bind(&server::https_handle_accept, this, con,
 			    boost::asio::placeholders::error));
 		}
 	}
@@ -254,23 +244,47 @@ void server::do_accept() {
 	}
 }
 
-void server::https_handle_accept(std::shared_ptr<HTTPS> socket, const boost::system::error_code& ec)
+void server::handle_accept(connection* con, const boost::system::error_code& ec)
 {
+	if (!acceptor_.is_open())
+	{
+	  return;
+	}
+
 	if (!ec)
 	{
-		//Start new operation quickly if not done
-		if (ec != boost::asio::error::operation_aborted)
-			do_accept();
-
-		boost::asio::ip::tcp::no_delay option(true);
-                socket->lowest_layer().set_option(option);
-
 		if(config != nullptr)
 		{
-			socket->async_handshake(boost::asio::ssl::stream_base::server, boost::bind(&server::https_handle_handshake, this, boost::asio::placeholders::error));
+			con->handlers_ = &handlers_;
+			con->start();
 		}
+	} 
+	else if (ec) 
+	{
+		throw ec;
+	}
 
-		do_accept();
+	do_accept();
+}
+
+void server::https_handle_accept(connection* con, const boost::system::error_code& ec)
+{
+	if (!acceptor_.is_open())
+	{
+	  return;
+	}
+
+	//Start new operation quickly if not done
+	//if (ec != boost::asio::error::operation_aborted)
+	//	do_accept();
+
+	if (!ec)
+	{
+		//boost::asio::ip::tcp::no_delay option(true);
+        	//con->ssl_socket_.lowest_layer().set_option(option);
+
+		con->ssl_socket_->async_handshake(boost::asio::ssl::stream_base::server, 
+					boost::bind(&server::https_handle_handshake, this, con, boost::asio::placeholders::error));
 	}
 	else
 	{
@@ -278,11 +292,10 @@ void server::https_handle_accept(std::shared_ptr<HTTPS> socket, const boost::sys
 	}
 }
 
-void server::https_handle_handshake(const boost::system::error_code& ec)
+void server::https_handle_handshake(connection* con, const boost::system::error_code& ec)
 {
 	if(!ec)
 	{
-		std::shared_ptr<connection> con = std::make_shared<connection>(std::move(socket_), &io_service_, &context_);
 		con->handlers_ = &handlers_;
 		con->start();
 	}
@@ -290,6 +303,8 @@ void server::https_handle_handshake(const boost::system::error_code& ec)
 	{
 		throw ec;
 	}
+
+	do_accept();
 }
 
 

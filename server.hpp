@@ -8,7 +8,6 @@
 #include <thread>
 #include <boost/unordered_map.hpp>
 #include <boost/asio.hpp>
-#include <openssl/ssl.h>
 #include <boost/asio/ssl.hpp>
 
 #include "response.hpp"
@@ -21,6 +20,34 @@ typedef boost::asio::ssl::stream<boost::asio::ip::tcp::socket> HTTPS;
 
 namespace http {
 namespace server {
+
+class connection
+  : public std::enable_shared_from_this<connection>
+{
+public:
+	connection(const connection&) = delete;
+	connection& operator=(const connection&) = delete;
+	explicit connection(boost::asio::ip::tcp::socket socket, boost::asio::io_service& io_service,
+		boost::asio::ssl::context& context, bool isHttps);
+	explicit connection(boost::asio::ip::tcp::socket socket);
+	void start();
+	void stop();
+	boost::unordered_map<std::string, RequestHandler*>* handlers_;
+	HTTPS* ssl_socket_;
+private:
+	void do_read();
+	void do_write();
+	void handle_read(boost::system::error_code ec, std::size_t bytes);
+	void handle_write(boost::system::error_code ec, std::size_t bytes);
+
+	boost::asio::ip::tcp::socket socket_;
+	
+	std::array<char, 16384> buffer_;
+	Response response_;
+	std::unique_ptr<Request> request_;
+	bool isHttps_;
+};
+      
 
 class server
 {
@@ -36,11 +63,11 @@ private:
 	boost::asio::io_service io_service_;
 	boost::asio::ip::tcp::acceptor acceptor_;
 	boost::asio::ip::tcp::socket socket_;
-	std::string session_id_context;
-	bool set_session_id_context = false;
+	std::string get_password() const;
 
-	void https_handle_accept(std::shared_ptr<HTTPS> socket, const boost::system::error_code& error);
-	void https_handle_handshake(const boost::system::error_code& ec);
+	void handle_accept(connection* con, const boost::system::error_code& ec);
+	void https_handle_accept(connection* con, const boost::system::error_code& ec);
+	void https_handle_handshake(connection* con, const boost::system::error_code& ec);
 
 	void InitHandlers();
 
@@ -50,30 +77,6 @@ private:
 
 	boost::asio::ssl::context context_;
 };
-
-class connection
-  : public std::enable_shared_from_this<connection>
-{
-public:
-	connection(const connection&) = delete;
-	connection& operator=(const connection&) = delete;
-	explicit connection(boost::asio::ip::tcp::socket socket, boost::asio::io_service* io_service = nullptr, boost::asio::ssl::context* context = nullptr);
-	void start();
-	void stop();
-	boost::unordered_map<std::string, RequestHandler*>* handlers_;
-
-private:
-	void do_read();
-	void do_write();
-
-	boost::asio::ip::tcp::socket socket_;
-	HTTPS* ssl_socket_;
-	std::array<char, 16384> buffer_;
-	Response response_;
-	std::unique_ptr<Request> request_;
-
-};
-      
 } // namespace server
 } // namespace http
 

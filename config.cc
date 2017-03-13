@@ -102,9 +102,9 @@ bool ServerConfig::ParseStatement(std::shared_ptr<NginxConfigStatement> statemen
 	} 
 	else if(statement->tokens_[0].compare(HTTPS_TOKEN) == 0)
 	{
-		if(statement->tokens_[1].compare("on"))
+		if(statement->tokens_[1].compare("on") == 0)
 			https = true;
-		else if (statement->tokens_[1].compare("off"))
+		else if (statement->tokens_[1].compare("off") == 0)
 			https = false;
 		else
 			throw InvalidConfigException("No or invalid HTTPS condition specified.");

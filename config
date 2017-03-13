@@ -1,4 +1,4 @@
-port 12345;
+port 8080;
 thread_pool_size 1;
 
 #comment
@@ -23,3 +23,7 @@ path / SpaceteamProxyHandler {
 	proxy_port 80;
 }
 
+https off {
+	certification_file_path server.crt;
+	key_file_path server.key;
+}

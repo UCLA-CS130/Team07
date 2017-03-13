@@ -1,5 +1,5 @@
 CXX=g++
-CXXOPTIMIZE= -O2
+CXXOPTIMIZE= 
 
 CXXFLAGS= -g -Wall -static-libgcc -static-libstdc++ -pthread -Wl,--no-as-needed -std=c++11 
 LDFLAGS= -lboost_filesystem -lboost_system -lboost_regex -lcrypto -lssl -lboost_system
