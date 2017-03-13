@@ -53,9 +53,10 @@
 		<h3> Cool Features: </h3>
 
 		<h4> Markdown Rendering </h4>
-		<p> To verify that the .md file was rendered to an html file, we can look at the develop tools on the browser, reload the page and see the response. The response should show up as html.
+		<p>
+		Markdown rendering is essentially an additional feature for the file handler. It will basically check to see if a file has an extension of .md. If so, it will convert it to html.
 		<br><br>
-		This markdown rendering is essentially an additional feature for the file handler. It will basically check to see if a file has an extension of .md. If so, it will convert it to html.
+		To verify that the .md file was rendered to an html file, we can look at the develop tools on the browser, reload the page and see the response. The response should show up as html.
 		<br><br>
 		We used the cpp-markdown implementation by chadaaronnelson to help us with markdown rendering. It involves breaking down the the .md file into tokens, and then rebuilding the tokens into an html file.<br>
 		 To check this out go to: <a href="http://35.166.184.153:8080/static2/sample_markdown.md">http://35.166.184.153:8080/static2/sample_markdown.md</a>
@@ -63,7 +64,14 @@
 
 		<h4> HTTPS </h4>
 		<p> Our server uses HTTPS.<br>
-		 
+		To implement this, we use boost::asio::ssl (which in turn relies on openssl).
+		We had to create a .key and a .crt file with a private key for conversation establishment and a certification to be sent with and used in encrypting the message, and we also created a 2048 bit diffie hellman file used during the HTTPS handshake. Once the handshake has taken place, we simply use a special boost ssl::stream socket that handles all the encrypting of the conversation automatically.
+		<br> <br>
+		We have added the ability for HTTPS to be a configurable parameter via our config file, and we can set it to be either on or off depending on our needs.
+		<br> <br>
+		However, we did not get a certification authority verification, so online our server will show an invalid ceritifacte warning unless you give the browser the same certificate as the server directly and mark it as trusted. The self-signed certificate we have is temporary, usable for only 365 days for testing purposes.
+		<br><br>
+		To observe this feature, simply visit any of our provided links, and note the HTTPS connection.
 		</p>
 	</div>	
 	</body>
