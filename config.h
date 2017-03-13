@@ -18,6 +18,9 @@ extern const char* PATH_TOKEN;
 extern const char* FILE_HANDLER_ROOT_TOKEN;
 extern const char* PROXY_PORT_TOKEN;
 extern const char* PROXY_HOST_TOKEN;
+extern const char* HTTPS_TOKEN;
+extern const char* CERT_FILE_TOKEN;
+extern const char* KEY_FILE_TOKEN;
 
 class InvalidConfigException: public std::runtime_error
 {
@@ -57,19 +60,29 @@ struct Path{
 class ServerConfig {
  private:
 	int portNo;
+	int threadPoolSize;
+	bool https;
 	boost::unordered_map<std::string, Path*> paths;
 	bool ParseStatements();
 	bool ParseStatement(std::shared_ptr<NginxConfigStatement> statement, Path* lastPath = nullptr);
 	NginxConfig* parsedConfig;
 	std::pair<std::string, Path*> defaultpath;
+	std::string certFilePath;
+	std::string keyFilePath;
 
  public:
 	ServerConfig(const std::string& configFilePath);
 	int GetPortNo();
+
 	std::string ToString();
 	~ServerConfig();
 	std::pair<std::string, Path*>& GetDefault();
 	boost::unordered_map<std::string, Path*>& GetPaths();
+
+	int GetThreadPoolSize();
+	bool IsHttps();
+	std::string GetCertFilePath();
+	std::string GetKeyFilePath();
 
 };
 

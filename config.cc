@@ -18,6 +18,10 @@ const char* FILE_HANDLER_ROOT_TOKEN = "root";
 const char* DEFAULT_TOKEN = "default";
 const char* PROXY_PORT_TOKEN = "proxy_port";
 const char* PROXY_HOST_TOKEN = "host";
+const char* HTTPS_TOKEN = "https";
+const char* CERT_FILE_TOKEN = "certification_file_path";
+const char* KEY_FILE_TOKEN = "key_file_path";
+const char* THREAD_POOL_SIZE_TOKEN = "thread_pool_size";
 
 ServerConfig::ServerConfig(const std::string& configFilePath) {
 	NginxConfigParser config_parser;
@@ -29,6 +33,22 @@ ServerConfig::ServerConfig(const std::string& configFilePath) {
 
 int ServerConfig::GetPortNo() {
 	return portNo;
+}
+
+int ServerConfig::GetThreadPoolSize() {
+	return threadPoolSize;
+}
+
+bool ServerConfig::IsHttps() {
+	return https;
+}
+
+std::string ServerConfig::GetCertFilePath() {
+	return certFilePath;
+}
+
+std::string ServerConfig::GetKeyFilePath() {
+	return keyFilePath;
 }
 
 boost::unordered_map<std::string, Path*>& ServerConfig::GetPaths() {
@@ -69,6 +89,34 @@ bool ServerConfig::ParseStatement(std::shared_ptr<NginxConfigStatement> statemen
 		}
 		return true;
 	} 
+	else if(statement->tokens_[0].compare(THREAD_POOL_SIZE_TOKEN) == 0)
+	{
+		int threadPoolSizeRead = std::stoi(statement->tokens_[1]);
+
+		if(threadPoolSizeRead > 0 && threadPoolSizeRead <= 32)
+			threadPoolSize = threadPoolSizeRead;
+		else
+			threadPoolSize = 1;
+
+		return true;
+	} 
+	else if(statement->tokens_[0].compare(HTTPS_TOKEN) == 0)
+	{
+		if(statement->tokens_[1].compare("on"))
+			https = true;
+		else if (statement->tokens_[1].compare("off"))
+			https = false;
+		else
+			throw InvalidConfigException("No or invalid HTTPS condition specified.");
+
+		if(statement->child_block_ != nullptr)
+		{
+			for (const auto& fileHandlerStatement : statement->child_block_->statements_) 
+				ParseStatement(fileHandlerStatement);
+		}
+
+		return true;
+	}
 	else if(statement->tokens_[0].compare(DEFAULT_TOKEN) == 0)
 	{
 		Path* new_path = new Path("", statement->tokens_[1]);
@@ -95,9 +143,6 @@ bool ServerConfig::ParseStatement(std::shared_ptr<NginxConfigStatement> statemen
 			new_path->child_block_ = &(*statement->child_block_);
 			for (const auto& fileHandlerStatement : statement->child_block_->statements_) 
 				ParseStatement(fileHandlerStatement, new_path);
-
-			//if(new_path->options.empty() || new_path->options[FILE_HANDLER_ROOT_TOKEN] == nullptr)
-			//	throw InvalidConfigException("No doc_root path specified. File handler not useable.");
 		}
 		
 		return true;
@@ -106,16 +151,29 @@ bool ServerConfig::ParseStatement(std::shared_ptr<NginxConfigStatement> statemen
 	{
 		PathOption* new_option = new PathOption(statement->tokens_[0], statement->tokens_[1]);
 		lastPath->options[statement->tokens_[0]] = new_option;
+		return true;
 	}
 	else if (statement->tokens_[0].compare(PROXY_PORT_TOKEN) == 0)
 	{
 		PathOption* new_option = new PathOption(statement->tokens_[0], statement->tokens_[1]);
 		lastPath->options[statement->tokens_[0]] = new_option;
+		return true;
 	}
 	else if (statement->tokens_[0].compare(PROXY_HOST_TOKEN) == 0)
 	{
 		PathOption* new_option = new PathOption(statement->tokens_[0], statement->tokens_[1]);
 		lastPath->options[statement->tokens_[0]] = new_option;
+		return true;
+	}
+	else if (statement->tokens_[0].compare(CERT_FILE_TOKEN) == 0)
+	{
+		certFilePath = statement->tokens_[1];
+		return true;
+	}
+	else if (statement->tokens_[0].compare(KEY_FILE_TOKEN) == 0)
+	{
+		keyFilePath = statement->tokens_[1];
+		return true;
 	}
 	return false;
 }

@@ -1,22 +1,25 @@
 port 12345;
+thread_pool_size 1;
+
 #comment
 path /echo echo_handler {}
 path /static1 file_handler {
-  root files;
+	root files;
 }
 path /static2 file_handler {
-#comment
-  root files1;
+	#comment
+	root files1;
 }
 path /status StatusHandler {}
 
 default NotFoundHandler {}
 
 path /proxy ProxyHandler {
-    root www.ucla.edu;
+	root www.ucla.edu;
 }
 
 path / SpaceteamProxyHandler {
 	host www.ucla.edu;
 	proxy_port 80;
 }
+
