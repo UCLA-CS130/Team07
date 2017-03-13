@@ -1,3 +1,4 @@
+
 //Based off: http://www.boost.org/doc/libs/1_62_0/doc/html/boost_asio/example/cpp11/http/server/server.cpp
 // and http://www.boost.org/doc/libs/1_62_0/doc/html/boost_asio/example/cpp11/http/server/connection.cpp
 // and for HTTPS, https://github.com/eidheim/Simple-Web-Server/blob/master/server_https.hpp
@@ -60,6 +61,7 @@ void connection::stop() {
 
 void connection::handle_read(boost::system::error_code ec, std::size_t bytes)
 {
+	try{
 	request_ = Request::Parse(buffer_.data());
         std::string uri = request_->uri();
 	std::string cur_prefix = uri;
@@ -103,6 +105,7 @@ void connection::handle_read(boost::system::error_code ec, std::size_t bytes)
 		} //lock object destroyed => mutex unlocked
 	}
         do_write();
+	} catch(boost::system::error_code const &e){};
 }
 
 void connection::do_read() {
@@ -204,20 +207,20 @@ server::~server() {
 
 void server::run() {
 
-	threads_.clear();
-	for(int c = 1; c < config->GetThreadPoolSize(); c++) {
-		threads_.emplace_back([this]() {
-			io_service_.run();
-		});
-	}
+	//threads_.clear();
+	//for(int c = 1; c < config->GetThreadPoolSize(); c++) {
+	//	threads_.emplace_back([this]() {
+	//		io_service_.run();
+	//	});
+	//}
 
 	if(config->GetThreadPoolSize() > 0)
 		io_service_.run();
 	
 	
-	for(auto& t: threads_) {
-		t.join();
-	}
+	//for(auto& t: threads_) {
+	//	t.join();
+	//}
 
 }
 
@@ -240,7 +243,7 @@ void server::do_accept() {
 		}
 	}
 	catch (boost::system::error_code const &e) {
-		throw e;
+		do_accept();//throw e;
 	}
 }
 
@@ -261,7 +264,7 @@ void server::handle_accept(connection* con, const boost::system::error_code& ec)
 	} 
 	else if (ec) 
 	{
-		throw ec;
+		do_accept();
 	}
 
 	do_accept();
@@ -288,7 +291,7 @@ void server::https_handle_accept(connection* con, const boost::system::error_cod
 	}
 	else
 	{
-		throw ec;
+		do_accept();
 	}
 }
 
@@ -301,7 +304,7 @@ void server::https_handle_handshake(connection* con, const boost::system::error_
 	}
 	else if (ec) 
 	{
-		throw ec;
+		do_accept();
 	}
 
 	do_accept();

@@ -23,7 +23,7 @@ path / SpaceteamProxyHandler {
 	proxy_port 80;
 }
 
-https off {
+https on {
 	certification_file_path server.crt;
 	key_file_path server.key;
 }

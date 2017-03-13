@@ -2,7 +2,7 @@ CXX=g++
 CXXOPTIMIZE= 
 
 CXXFLAGS= -g -Wall -static-libgcc -static-libstdc++ -pthread -Wl,--no-as-needed -std=c++11 
-LDFLAGS= -lboost_filesystem -lboost_system -lboost_regex -lcrypto -lssl -lboost_system
+LDFLAGS= -lboost_system -lboost_regex -lcrypto -lssl
 SRCFILES = server.cpp response.cpp request.cpp request_parser.cpp config.cc config_parser.cc request_handler.cpp echo_handler.cpp file_handler.cpp not_found_handler.cpp status_handler.cpp server_stats.cpp proxy_handler.cpp spaceteam_proxy_handler.cpp cpp-markdown/markdown.cpp cpp-markdown/markdown-tokens.cpp
 
 GTEST_DIR = googletest/googtest
