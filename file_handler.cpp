@@ -3,6 +3,7 @@
 #include <fstream>
 #include <sstream>
 #include <boost/filesystem.hpp>
+#include "cpp-markdown/markdown.h"
 
 namespace http {
 namespace server {
@@ -112,9 +113,7 @@ RequestHandler::Status file_handler::HandleRequest(const Request &request, Respo
 	while (is.read(buf, sizeof(buf)).gcount() > 0)
 		body.append(buf, is.gcount());
 
-	response->SetBody(body);
-
-	response->AddHeader("Content-Length", std::to_string(body.size()));
+	
 	
 	if(extension == "gif") {
 		extension = "image/gif";
@@ -131,11 +130,34 @@ RequestHandler::Status file_handler::HandleRequest(const Request &request, Respo
 	else if (extension == "png") {
 		extension = "image/png";
 	}
+	else if (extension == "md") {
+		extension = "text/markdown";
+	}
 	else {
 		extension = "text/plain";
 	}
 
-	response->AddHeader("Content-Type", extension);
+	if (extension == "text/markdown") {
+		markdown::Document doc;
+		doc.read(body);
+		std::ostringstream stream;
+		doc.write(stream);
+
+		std::string markd = stream.str();
+
+		response->SetBody(markd);
+
+		response->AddHeader("Content-Length", std::to_string(markd.size()));
+
+		response->AddHeader("Content-Type", "text/html");
+
+	} else {
+		response->SetBody(body);
+
+		response->AddHeader("Content-Length", std::to_string(body.size()));
+
+		response->AddHeader("Content-Type", extension);
+	}	
 
 	return RequestHandler::OK;
 }
