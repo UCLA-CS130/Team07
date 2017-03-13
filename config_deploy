@@ -15,3 +15,8 @@ default NotFoundHandler {}
 path /proxy ProxyHandler {
     root www.ucla.edu;
 }
+
+https off {
+	certification_file_path server.crt;
+	key_file_path server.key;
+}

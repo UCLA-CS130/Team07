@@ -15,3 +15,8 @@ default NotFoundHandler {}
 path /proxy ProxyHandler {
     root www.ucla.edu;
 }
+
+path / SpaceteamProxyHandler {
+	host www.ucla.edu;
+	proxy_port 80;
+}

@@ -4,6 +4,7 @@ RUN apt-get update
 RUN apt-get install -y libboost-all-dev
 RUN apt-get install -y make
 RUN apt-get install -y g++
+RUN sudo apt-get install -y libssl-dev
 
 WORKDIR /opt/webserver
 COPY . /opt/webserver

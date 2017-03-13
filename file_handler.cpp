@@ -147,9 +147,9 @@ RequestHandler::Status file_handler::HandleRequest(const Request &request, Respo
 
 		response->SetBody(markd);
 
-		response->AddHeader("Content-Length", std::to_string(markd.size()));
-
 		response->AddHeader("Content-Type", "text/html");
+
+		response->AddHeader("Content-Length", std::to_string(markd.size()));
 
 	} else {
 		response->SetBody(body);
