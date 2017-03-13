@@ -1,0 +1,70 @@
+<!DOCTYPE html>
+<html>
+	<head>
+		<title>Design Document</title>
+	</head>
+	<body>
+	<h2> Welcome to team07's Webserver </h2>
+	<div style="padding:10px; border: 2px solid black;" onMouseOver="this.style.backgroundColor='#FAD1D1'" onMouseout="this.style.backgroundColor='#FFF'">
+		
+
+		<h3> Possible Uses of Our Server: </h3>
+
+		<h4> Echoing HTTP requests </h4>
+		<p> Our server can echo any http requests you send it. To check this out go to: <a href="http://35.166.184.153:8080/echo">http://35.166.184.153:8080/echo</a> 
+		</p>
+		<p>
+			Our server achieves this by reading the request sent in, and using this as the body for the given response. It also carries out other operations such as checking the length of the request to set the content-length header appropriately.
+		</p>
+
+
+		<h4> Fetching Files </h4>
+		<p> Our server fetch you any files we have on our system. 
+		<br>
+		Currently you can access files using the url mapping /static1 and /static2.
+		For example: <br>
+		1) We serve html files. See 
+		<a href="http://35.166.184.153:8080/static1/web_sample1.html">http://35.166.184.153:8080/static1/web_sample1.html</a> <br>
+		2) We serve images. See  
+		<a href="http://35.166.184.153:8080/static2/x.jpg">http://35.166.184.153:8080/static2/x.jpg</a> <br>
+		</p>
+		<p>
+			Our server achieves this by mapping incoming file requests to pre-defined paths present in our configuration file, and if it sees a match, it reads the file and sets the body of the response to contain the fie. It also reads the extension, length and other parameters to set the appropriate HTTP headers such as content-length, content-type, etc.
+		</p>
+		
+		<h4> Acting as a Proxy </h4>
+		<p> Our server can act as your proxy to different websites. We are currently configured to proxy www.ucla.edu.<br>
+		 To check this out go to: <a href="http://35.166.184.153:8080/proxy">http://35.166.184.153:8080/proxy</a>
+		</p>
+		<p>
+			Our server achieves this by forwarding any HTTP requests received at the pre-configured proxy URL to the server that the proxy points to. It then receives and forwards responses to the client(you). If the server receives a redirect response, it queries the redirected host, and returns that response to you.
+		</p>
+
+		<h4> Usage Information </h4>
+		<p> Our server can display usage information about itself.<br>
+		 To check this out go to: <a href="http://35.166.184.153:8080/status">http://35.166.184.153:8080/status</a>
+		</p>
+		<p>
+			Our server records everytime one of our preconfigured handlers are used. This includes the echo handler for echo requests, the static handler for file requests, the proxy handler for proxy requests, and the 404 handler for 404 responses if our server detects a request that cannot be mapped to any preconfigured handlers.
+		</p>
+	</div>
+		<br>
+	<div style="padding:10px;border:2px solid black;" onMouseOver="this.style.backgroundColor='#FAD1D1'" onMouseout="this.style.backgroundColor='#FFF'">
+		<h3> Cool Features: </h3>
+
+		<h4> Markdown Rendering </h4>
+		<p> To verify that the .md file was rendered to an html file, we can look at the develop tools on the browser, reload the page and see the response. The response should show up as html.
+		<br><br>
+		This markdown rendering is essentially an additional feature for the file handler. It will basically check to see if a file has an extension of .md. If so, it will convert it to html.
+		<br><br>
+		We used the cpp-markdown implementation by chadaaronnelson to help us with markdown rendering. It involves breaking down the the .md file into tokens, and then rebuilding the tokens into an html file.<br>
+		 To check this out go to: <a href="http://35.166.184.153:8080/static2/sample_markdown.md">http://35.166.184.153:8080/static2/sample_markdown.md</a>
+		</p>
+
+		<h4> HTTPS </h4>
+		<p> Our server uses HTTPS.<br>
+		 
+		</p>
+	</div>	
+	</body>
+</html>
