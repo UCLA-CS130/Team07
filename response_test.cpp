@@ -48,35 +48,36 @@ TEST(ResponseTest, HeaderVector) {
 }
 
 class ResponseHeaderTest : public ::testing::Test {
-protected:
-	bool AnalyzeHeader(std::string rcontent){
-		resp_.SetStatus(http::server::Response::not_found);
-		resp_.SetBody(rcontent);
-		buffers = resp_.to_buffers();
-		std::string body = "HTTP/1.1 404 Not Found\r\n";
-		body += rcontent;
-		if (resp_.ToString() == body) {
-			return true;
+	protected:
+		bool AnalyzeHeader(std::string rcontent) {
+			resp_.SetStatus(http::server::Response::not_found);
+			resp_.SetBody(rcontent);
+			buffers = resp_.to_buffers();
+			std::string body = "HTTP/1.1 404 Not Found\r\n";
+			body += rcontent;
+			if (resp_.ToString() == body)
+			{
+				return true;
+			}
+			return false;	
+
 		}
-		return false;	
+		void loadHeader() {
+			resp_.SetStatus(http::server::Response::not_found);
+			resp_.SetBody("Test content");
+			head1_.name = "Content-Length";
+			head1_.value = std::to_string(12);
+			resp_.AddHeader(head1_.name, head1_.value);
 
-	}
-	void loadHeader() {
-		resp_.SetStatus(http::server::Response::not_found);
-		resp_.SetBody("Test content");
-		head1_.name = "Content-Length";
-		head1_.value = std::to_string(12);
-		resp_.AddHeader(head1_.name, head1_.value);
+			head2_.name = "Content-Type";
+			head2_.value = "text/plain";
+			resp_.AddHeader(head2_.name, head2_.value);
 
-		head2_.name = "Content-Type";
-		head2_.value = "text/plain";
-		resp_.AddHeader(head2_.name, head2_.value);
-
-		buffers = resp_.to_buffers();
-	}
-	http::server::Response resp_;
-	http::server::header head1_, head2_;
-	std::vector<boost::asio::const_buffer> buffers;
+			buffers = resp_.to_buffers();
+		}
+		http::server::Response resp_;
+		http::server::header head1_, head2_;
+		std::vector<boost::asio::const_buffer> buffers;
 };
 
 TEST_F(ResponseHeaderTest, HeaderParsing) {

@@ -1,11 +1,11 @@
 CXX=g++
 CXXOPTIMIZE= -O2
 
-CXXFLAGS= -g -Wall -static-libgcc -static-libstdc++ -pthread -Wl,-Bstatic -std=c++11
-LDFLAGS= -lboost_filesystem -lboost_system -lboost_regex
+CXXFLAGS= -g -Wall -static-libgcc -static-libstdc++ -pthread -Wl,--no-as-needed -std=c++11 
+LDFLAGS= -lboost_filesystem -lboost_system -lboost_regex -lcrypto -lssl -lboost_system
 SRCFILES = server.cpp response.cpp request.cpp request_parser.cpp config.cc config_parser.cc request_handler.cpp echo_handler.cpp file_handler.cpp not_found_handler.cpp status_handler.cpp server_stats.cpp proxy_handler.cpp spaceteam_proxy_handler.cpp cpp-markdown/markdown.cpp cpp-markdown/markdown-tokens.cpp
 
-GTEST_DIR = googletest/googletest
+GTEST_DIR = googletest/googtest
 GMOCK_DIR = googletest/googlemock
 
 all: CXXFLAGS += $(CXXOPTIMIZE)
@@ -33,16 +33,16 @@ run_coverage:
 	gcov -r server.cpp response.cpp config.cc config_parser.cc request_parser.cpp echo_handler.cpp file_handler.cpp request.cpp not_found_handler.cpp status_handler.cpp server_stats.cpp proxy_handler.cpp spaceteam_proxy_handler.cpp base_
 
 webserver:
-	$(CXX) -o $@ $^ $(CXXFLAGS) $(SRCFILES) $(LDFLAGS)
+	$(CXX) -I /usr/include/boost/ -o $@ $^ $(CXXFLAGS) $(SRCFILES) $(LDFLAGS)
 
 webserver_test: 
 	$(CXX) $(CXXFLAGS) -I${GTEST_DIR} -c ${GTEST_DIR}/src/gtest-all.cc
 	ar -rv libgtest.a gtest-all.o
-	$(CXX) -o $@ $^ $(CXXFLAGS) -fprofile-arcs -ftest-coverage $(SRCFILES) $(LDFLAGS)
+	$(CXX) -I /usr/include/boost/ -o $@ $^ $(CXXFLAGS) -fprofile-arcs -ftest-coverage $(SRCFILES) $(LDFLAGS)
 
 
 clean:
-	rm -rf *.o webserver webserver_test
+	rm -rf *.o *.gcov *.gcda *.gcno webserver webserver_test
 
 integration:
 	make clean && make

@@ -9,38 +9,36 @@
 #include <memory>
 
 namespace http {
-namespace server {
+	namespace server {
 
-struct request_parser_output;
+		struct request_parser_output;
 
-class Request {
- public:
-	static std::unique_ptr<Request> Parse(const std::string& raw_request);
+		class Request {
+		 	public:
+				static std::unique_ptr<Request> Parse(const std::string& raw_request);
 
-	std::string raw_request() const;
-	std::string method() const;
-	std::string uri() const;
-	std::string version() const;
+				std::string raw_request() const;
+				std::string method() const;
+				std::string uri() const;
+				std::string version() const;
 
-	//TODO: check why this is written like this
-	using Headers = std::vector<std::pair<std::string, std::string>>;
-	Headers headers() const;
+				using Headers = std::vector<std::pair<std::string, std::string>>;
+				Headers headers() const;
+				std::string body() const;
 
-	std::string body() const;
+		 	private:
+				std::string raw_request_;
 
- private:
-	std::string raw_request_;
+				std::string method_;
+				std::string uri_;
+				int http_version_major_;
+				int http_version_minor_;
+				Headers headers_;
+				std::string content_;
+				long unsigned int bytes_;
+		};
 
-	std::string method_;
-	std::string uri_;
-	int http_version_major_;
-	int http_version_minor_;
-	Headers headers_;
-	std::string content_;
-	long unsigned int bytes_;
-};
-
-} // namespace server
-} // namespace http
+	} 
+} 
 
 #endif // HTTP_REQUEST_HPP

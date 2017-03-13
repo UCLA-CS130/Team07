@@ -4,23 +4,26 @@
 #include "request_handler.hpp"
 
 namespace http {
-namespace server {
-class ProxyHandler : public RequestHandler {
-public:
-    ProxyHandler();
-    virtual ~ProxyHandler();
-    Status Init(const std::string& uri_prefix, const NginxConfig& config);
-    Status HandleRequest(const Request &request, Response* response);
-private:
-    Response::ResponseCode RedirectRequest(std::string& location, const std::string& uri, Response* response);
-    Response::ResponseCode GetResponseCode(const unsigned int& status_code);
+	namespace server {
 
-    std::string location_;
-    std::string uri_prefix_;
-};
+		class ProxyHandler : public RequestHandler {
+			
+			public:
+			    ProxyHandler();
+			    virtual ~ProxyHandler();
+			    Status Init(const std::string& uri_prefix, const NginxConfig& config);
+			    Status HandleRequest(const Request &request, Response* response);
+			
+			private:
+			    Response::ResponseCode RedirectRequest(std::string& location, const std::string& uri, Response* response);
+			    Response::ResponseCode GetResponseCode(const unsigned int& status_code);
 
-REGISTER_REQUEST_HANDLER(ProxyHandler);
-}
+			    std::string location_;
+			    std::string uri_prefix_;
+		};
+
+		REGISTER_REQUEST_HANDLER(ProxyHandler);
+	}
 }
 
 #endif
