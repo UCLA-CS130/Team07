@@ -4,30 +4,30 @@
 #include <sstream>
 
 namespace http {
-namespace server {
+	namespace server {
 
-RequestHandler::Status NotFoundHandler::HandleRequest(const Request &request, Response* response) {
-	//Uses the stock response function to create and set a 404 not found response
-	const char text[] = 
-		"<html>"
-  		"<head><title>Not Found</title></head>"
-  		"<body><h1>404 Not Found</h1></body>"
-  		"</html>";
-  	std::string body = text;
-	response->SetStatus(Response::not_found);
-	response->SetBody(body); //.append(req.content, req.content+ req.bytes);
+		RequestHandler::Status NotFoundHandler::HandleRequest(const Request &request, Response* response) {
+			//Uses the stock response function to create and set a 404 not found response
+			const char text[] = 
+				"<html>"
+  				"<head><title>Not Found</title></head>"
+  				"<body><h1>404 Not Found</h1></body>"
+  				"</html>";
+		  	std::string body = text;
+			response->SetStatus(Response::not_found);
+			response->SetBody(body); //.append(req.content, req.content+ req.bytes);
 
-	response->AddHeader("Content-Length", std::to_string(body.size()));
-	response->AddHeader("Content-Type", "text/html");
+			response->AddHeader("Content-Length", std::to_string(body.size()));
+			response->AddHeader("Content-Type", "text/html");
 
-	return RequestHandler::not_found;
-}
+			return RequestHandler::not_found;
+		}
 
 
-RequestHandler::Status NotFoundHandler::Init(const std::string& uri_prefix, const NginxConfig& config)
-{
-	return RequestHandler::OK;
-}
+		RequestHandler::Status NotFoundHandler::Init(const std::string& uri_prefix, const NginxConfig& config)
+		{
+			return RequestHandler::OK;
+		}
 
-}
+	}
 }

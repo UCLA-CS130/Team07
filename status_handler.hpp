@@ -4,20 +4,20 @@
 #include "request_handler.hpp"
 
 namespace http {
-namespace server {
-class StatusHandler: public RequestHandler {
-public:
-	Status HandleRequest(const Request &request, Response* response);	
-	Status Init(const std::string& uri_prefix, const NginxConfig& config);
+	namespace server {
+		class StatusHandler: public RequestHandler {
+			public:
+				Status HandleRequest(const Request &request, Response* response);	
+				Status Init(const std::string& uri_prefix, const NginxConfig& config);
 
-	~StatusHandler(){}
-private:
-	std::string setBodyString();
-};
+				~StatusHandler(){}
+			private:
+				std::string setBodyString();
+		};
 
-REGISTER_REQUEST_HANDLER(StatusHandler);
+		REGISTER_REQUEST_HANDLER(StatusHandler);
 
-}
+	}
 }
 
 #endif // STATUS_HANDLER_HPP

@@ -5,50 +5,57 @@
 #include <boost/array.hpp>
 
 TEST(ServerTesting, ConstructorCheck) {
-	try {
+	try
+	{
 		http::server::server server_("config");
 		
 	}
-	catch(boost::system::error_code &e) {
+	catch(boost::system::error_code &e)
+	{
 		EXPECT_EQ(e.message(), "Numerical argument out of domain");
 	}
 
 }
 
 TEST(ServerTesting, AddressCheck) {
-	try {
+	try
+	{
 		http::server::server server_("config");	
 	}
-	catch(boost::system::error_code &e) {
+	catch(boost::system::error_code &e)
+	{
 		EXPECT_EQ(e.message(), "Bad address");
 	}
 
 }
 
 TEST(ConnectionTesting, InitializationAndConnectionTest) {
-	try {
+	try
+	{
 		http::server::server server_("config");	
 	}
-	catch(boost::system::error_code &e) {
+	catch(boost::system::error_code &e)
+	{
 		std::cout << e.message() << std::endl;
 	}
 
 }
 
 class Handler{
-public:
-	boost::array<char, 1> data_;
-	void handlerWrite(
-	  const boost::system::error_code& error, // Result of operation.
-	  std::size_t bytes_transferred           // Number of bytes written.
-	){}
+	public:
+		boost::array<char, 1> data_;
+		void handlerWrite(
+		  const boost::system::error_code& error, // Result of operation.
+		  std::size_t bytes_transferred           // Number of bytes written.
+		){}
 
-	void handlerRead(const boost::system::error_code& error, std::size_t bytes_transferred)
-	{}
+		void handlerRead(const boost::system::error_code& error, std::size_t bytes_transferred)
+		{}
 };
 
 TEST(ConnectionTesting, ConnectionConstructor) {
-	try {
+	try 
+	{
 		Handler* handler = new Handler();
 		boost::asio::io_service io;
 		boost::asio::ip::tcp::socket sock(io);
@@ -64,7 +71,8 @@ TEST(ConnectionTesting, ConnectionConstructor) {
 		    	boost::asio::placeholders::error, boost::asio::placeholders::bytes_transferred));
 		delete(handler);
 	}
-	catch(boost::system::error_code &e) {
+	catch(boost::system::error_code &e) 
+	{
 		//std::cout << e.message();
 		EXPECT_EQ(e.message(), "Success");
 	}

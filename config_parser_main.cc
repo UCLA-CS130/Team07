@@ -3,8 +3,9 @@
 #include "config_parser.h"
 
 int main(int argc, char* argv[]) {
-  if (argc != 2) {
-    printf("Usage: ./config_parser <path to config file>\n");
+  if (argc != 2) 
+  {
+    std::cerr << "Usage: ./config_parser <path to config file>\n";
     return 1;
   }
 
@@ -12,6 +13,5 @@ int main(int argc, char* argv[]) {
   NginxConfig config;
   config_parser.Parse(argv[1], &config);
 
-  printf("%s", config.ToString().c_str());
   return 0;
 }

@@ -12,6 +12,7 @@
 
 const int DEFAULT_PORT = 80;
 
+// Important Token Declarations
 const char* PORT_TOKEN = "port";
 const char* PATH_TOKEN = "path";
 const char* FILE_HANDLER_ROOT_TOKEN = "root";
@@ -56,6 +57,7 @@ boost::unordered_map<std::string, Path*>& ServerConfig::GetPaths() {
 }
 
 bool ServerConfig::ParseStatements() {
+	
 	portNo = 0;
 	for(const auto& statement : parsedConfig->statements_)
 	{
@@ -67,25 +69,31 @@ bool ServerConfig::ParseStatements() {
 	{
 		//Setting standard port if not specified.
 		portNo = 80;
-		throw InvalidConfigException("Port number missing in config file.");
+		std::cerr << "Using port 80 as no port was specified in config" << std::endl;
 	}
 	if(paths.empty())
-		throw InvalidConfigException("No handler paths specified. Server not useable.");
+	{
+		std::cerr << "No Handler Paths specified" << std::endl;
+	}
 
 	return true;
 }
 
 bool ServerConfig::ParseStatement(std::shared_ptr<NginxConfigStatement> statement, Path* lastPath) {
+	
 	if(statement->tokens_[0].compare(PORT_TOKEN) == 0)
 	{
 		int portNoRead = std::stoi(statement->tokens_[1]);
+		
 		if(portNoRead > 0 && portNoRead <= 65535)
+		{
 			portNo = portNoRead;
+		}
 		else
 		{
 			//Setting standard port if given port out of range.
 			portNo = 80;
-			throw PortRangeException("Port number out of range.");
+			std::cerr << "Given Port Number does not exist, using port 80 instead." << std::endl;
 		}
 		return true;
 	} 
@@ -94,25 +102,37 @@ bool ServerConfig::ParseStatement(std::shared_ptr<NginxConfigStatement> statemen
 		int threadPoolSizeRead = std::stoi(statement->tokens_[1]);
 
 		if(threadPoolSizeRead > 0 && threadPoolSizeRead <= 32)
+		{
 			threadPoolSize = threadPoolSizeRead;
+		}
 		else
+		{
 			threadPoolSize = 1;
+		}
 
 		return true;
 	} 
 	else if(statement->tokens_[0].compare(HTTPS_TOKEN) == 0)
 	{
 		if(statement->tokens_[1].compare("on"))
+		{
 			https = true;
+		}
 		else if (statement->tokens_[1].compare("off"))
+		{
 			https = false;
+		}
 		else
-			throw InvalidConfigException("No or invalid HTTPS condition specified.");
+		{
+			std::cerr << "No or invalid HTTPS condition specified." << std::endl;
+		}
 
 		if(statement->child_block_ != nullptr)
 		{
-			for (const auto& fileHandlerStatement : statement->child_block_->statements_) 
+			for (const auto& fileHandlerStatement : statement->child_block_->statements_)
+			{
 				ParseStatement(fileHandlerStatement);
+			}
 		}
 
 		return true;
@@ -124,8 +144,10 @@ bool ServerConfig::ParseStatement(std::shared_ptr<NginxConfigStatement> statemen
 		if(statement->child_block_ != nullptr)
 		{
 			new_path->child_block_ = &(*statement->child_block_);
-			for (const auto& fileHandlerStatement : statement->child_block_->statements_) 
+			for (const auto& fileHandlerStatement : statement->child_block_->statements_)
+			{
 				ParseStatement(fileHandlerStatement, new_path);
+			}
 		}
 		
 		return true;
@@ -133,16 +155,20 @@ bool ServerConfig::ParseStatement(std::shared_ptr<NginxConfigStatement> statemen
 	else if(statement->tokens_[0].compare(PATH_TOKEN) == 0)
 	{
 		Path* new_path = new Path(statement->tokens_[1], statement->tokens_[2]);
-		if(paths.find(statement->tokens_[1]) != paths.end()) {
-			throw InvalidConfigException("Cannot re-specify mapping to " + statement->tokens_[1]);
+		if(paths.find(statement->tokens_[1]) != paths.end()) 
+		{
+			std::cerr << "UNRECOVERABLE ERROR: Cannot re-specify mapping to " << statement->tokens_[1] << std::endl;
+			exit(0);
 		}
 		paths[statement->tokens_[1]] = new_path;
 
 		if(statement->child_block_ != nullptr)
 		{
 			new_path->child_block_ = &(*statement->child_block_);
-			for (const auto& fileHandlerStatement : statement->child_block_->statements_) 
+			for (const auto& fileHandlerStatement : statement->child_block_->statements_)
+			{
 				ParseStatement(fileHandlerStatement, new_path);
+			}
 		}
 		
 		return true;
@@ -178,7 +204,7 @@ bool ServerConfig::ParseStatement(std::shared_ptr<NginxConfigStatement> statemen
 	return false;
 }
 
-ServerConfig::~ServerConfig(){
+ServerConfig::~ServerConfig() {
 	typedef std::pair<std::string, Path*> map_val_type;
 	typedef std::pair<std::string, PathOption*> option_map_val_type;
 
@@ -196,7 +222,6 @@ std::pair<std::string, Path*>& ServerConfig::GetDefault() {
 	return defaultpath;
 }
 
-//TODO:update ToString()
 std::string ServerConfig::ToString() {
 	std::string config_output;
 	config_output.append("Server is running on Port: ");

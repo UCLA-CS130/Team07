@@ -10,31 +10,34 @@ TEST(ServerConfigTest, SimpleConfig) {
 }
 
 TEST(ServerConfigTest, PortTooLargeConfig) {
-  try{
+  try
+  {
   	ServerConfig config("test_config_2");
   }
   catch (PortRangeException &e)
   {
-	EXPECT_EQ(0, strcmp(e.what(), "Port number out of range."));
+	 EXPECT_EQ(0, strcmp(e.what(), "Port number out of range."));
   }
 }
 
 TEST(ServerConfigTest, NoPortConfig) {
-  try{
+  try
+  {
   	ServerConfig config("test_config_3");
   }
   catch (InvalidConfigException &e)
   {
-	EXPECT_EQ(0, strcmp(e.what(), "Port number missing in config file."));
+	 EXPECT_EQ(0, strcmp(e.what(), "Port number missing in config file."));
   }
 }
 
 TEST(ServerConfigTest, EmptyConfig) {
-  try{
+  try
+  {
   	ServerConfig config("test_config_4");
   }
   catch (InvalidConfigException &e)
   {
-	EXPECT_EQ(0, strcmp(e.what(), "Port number missing in config file."));
+	 EXPECT_EQ(0, strcmp(e.what(), "Port number missing in config file."));
   }
 }
