@@ -66,12 +66,12 @@
 		<p> Our server uses HTTPS.<br>
 		To implement this, we use boost::asio::ssl (which in turn relies on openssl).
 		We had to create a .key and a .crt file with a private key for conversation establishment and a certification to be sent with and used in encrypting the message, and we also created a 2048 bit diffie hellman file used during the HTTPS handshake. Once the handshake has taken place, we simply use a special boost ssl::stream socket that handles all the encrypting of the conversation automatically.
-		<br> <br>
-		We have added the ability for HTTPS to be a configurable parameter via our config file, and we can set it to be either on or off depending on our needs.
-		<br> <br>
-		However, we did not get a certification authority verification, so online our server will show an invalid ceritifacte warning unless you give the browser the same certificate as the server directly and mark it as trusted. The self-signed certificate we have is temporary, usable for only 365 days for testing purposes.
 		<br><br>
-		To observe this feature, simply visit any of our provided links, and note the HTTPS connection.
+Unfortunately however, we were unable to make our https work with docker, so we have this feature available for testing locally at http://github.com/UCLA-CS130/Team07 
+<br><br>
+To demo, simply clone the repository, change into the branch https and run the command "make clean && make", followed by "./webserver config", then open up your browser and visit https://localhost:8007 
+<br>
+Note, that you have to mention https:// in the URL for it to work, we are working on upgrading incoming http to https connections.
 		</p>
 	</div>	
 	</body>
