@@ -19,71 +19,69 @@
 typedef boost::asio::ssl::stream<boost::asio::ip::tcp::socket> HTTPS; 
 
 namespace http {
-namespace server {
+	namespace server {
 
-class connection
-  : public std::enable_shared_from_this<connection>
-{
-public:
-	//connection(const connection&) = delete;
-	//connection& operator=(const connection&) = delete;
-	explicit connection(boost::asio::ip::tcp::socket socket, boost::asio::io_service& io_service,
-		boost::asio::ssl::context& context, bool isHttps);
-	explicit connection(boost::asio::ip::tcp::socket socket);
-	void start();
-	void stop();
-	boost::unordered_map<std::string, RequestHandler*>* handlers_;
-	HTTPS* ssl_socket_;
-private:
-	void do_read();
-	void do_write();
-	void handle_read(std::shared_ptr<connection>& self, boost::system::error_code ec, std::size_t bytes);
-	void handle_write(std::shared_ptr<connection>& self, boost::system::error_code ec, std::size_t bytes);
-	void handle_read(boost::system::error_code ec, std::size_t bytes);
-	void handle_write(boost::system::error_code ec, std::size_t bytes);
+		class connection
+		  : public std::enable_shared_from_this<connection>
+		{
+			public:
+				explicit connection(boost::asio::ip::tcp::socket socket, boost::asio::io_service& io_service,
+					boost::asio::ssl::context& context, bool isHttps);
+				explicit connection(boost::asio::ip::tcp::socket socket);
+				void start();
+				void stop();
+				boost::unordered_map<std::string, RequestHandler*>* handlers_;
+				HTTPS* ssl_socket_;
+			private:
+				void do_read();
+				void do_write();
+				void handle_read(std::shared_ptr<connection>& self, boost::system::error_code ec, std::size_t bytes);
+				void handle_write(std::shared_ptr<connection>& self, boost::system::error_code ec, std::size_t bytes);
+				void handle_read(boost::system::error_code ec, std::size_t bytes);
+				void handle_write(boost::system::error_code ec, std::size_t bytes);
 
-	boost::asio::ip::tcp::socket socket_;
-	
-	std::array<char, 16384> buffer_;
-	Response response_;
-	std::unique_ptr<Request> request_;
-	bool isHttps_;
-};
-      
+				boost::asio::ip::tcp::socket socket_;
+				
+				std::array<char, 16384> buffer_;
+				Response response_;
+				std::unique_ptr<Request> request_;
+				bool isHttps_;
+		};
+		      
 
-class server
-{
-public:
-	server(const server&) = delete;
-	server& operator=(const server&) = delete;
-	explicit server(const std::string& sconfig_path);
-	~server();
-	
-				std::string session_id_context;
-				bool set_session_id_context = false;
-	void run();
-  
-private:
-	void do_accept();
-	boost::asio::io_service io_service_;
-	boost::asio::ip::tcp::acceptor acceptor_;
-	boost::asio::ip::tcp::socket socket_;
-	std::string get_password() const;
+		class server
+		{
+			public:
+				server(const server&) = delete;
+				server& operator=(const server&) = delete;
+				explicit server(const std::string& sconfig_path);
+				~server();
+				
+							std::string session_id_context;
+							bool set_session_id_context = false;
+				void run();
+			  
+			private:
+				void do_accept();
+				boost::asio::io_service io_service_;
+				boost::asio::ip::tcp::acceptor acceptor_;
+				boost::asio::ip::tcp::socket socket_;
+				std::string get_password() const;
 
-	void handle_accept(const boost::system::error_code& ec, connection* con = nullptr);
-	void https_handle_accept(const boost::system::error_code& ec, connection* con = nullptr);
-	//void https_handle_handshake(connection* con, const boost::system::error_code& ec);
+				void handle_accept(const boost::system::error_code& ec, connection* con = nullptr);
+				void https_handle_accept(const boost::system::error_code& ec, connection* con = nullptr);
+				//void https_handle_handshake(connection* con, const boost::system::error_code& ec);
 
-	void InitHandlers();
+				void InitHandlers();
 
-	ServerConfig* config;
-	std::vector<std::thread> threads_;
-	boost::unordered_map<std::string, RequestHandler*> handlers_;
+				ServerConfig* config;
+				std::vector<std::thread> threads_;
+				boost::unordered_map<std::string, RequestHandler*> handlers_;
 
-	boost::asio::ssl::context context_;
-};
+				boost::asio::ssl::context context_;
+		};
 
-} // namespace server
+	} // namespace server
 } // namespace http
 
 #endif // HTTP_SERVER_HPP
