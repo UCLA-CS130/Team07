@@ -17,6 +17,6 @@ path /proxy ProxyHandler {
 }
 
 https on {
-	certification_file_path server.crt;
-	key_file_path server.key;
+	certification_file_path ssl_certificates/server.crt;
+	key_file_path ssl_certificates/server.key;
 }

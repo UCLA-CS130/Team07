@@ -21,29 +21,20 @@
 
 
 namespace http {
-namespace server { 
+	namespace server { 
 
-// HTTP RESPONSE/REQUEST WRITE/READ RELATED FUNCTIONS
 connection::connection(boost::asio::ip::tcp::socket socket, boost::asio::io_service& io_service,
 		boost::asio::ssl::context& context, bool isHttps)
-	//TODO: fix nullptrs
  	: socket_(std::move(socket))
 {
-	if(isHttps)
-		ssl_socket_ = new HTTPS(io_service, context);
 	isHttps_ = isHttps;
-	//ssl_socket_->lowest_layer().connect({ {}, 8007 }); 
+	if(isHttps_)
+		ssl_socket_ = new HTTPS(io_service, context);
 }
 
 connection::connection(boost::asio::ip::tcp::socket socket)
-	//TODO: fix nullptrs
  	: socket_(std::move(socket))
-{
-	//ssl_socket_.lowest_layer().connect({ {}, 1238 }); 
-}
-
-//connection::connection(boost::asio::ip::tcp::socket socket, Path* paths): socket_(std::move(socket)), paths_(paths)
-//{}
+{}
 
 void connection::start() {
 	try 
@@ -58,11 +49,16 @@ void connection::start() {
 
 void connection::stop() {
 	socket_.close();
-	//delete(ssl_socket_);
+	delete(ssl_socket_);
 }
 
 void connection::handle_read(boost::system::error_code ec, std::size_t bytes)
 {
+	if(buffer_.empty() && isHttps_)
+	{
+		isHttps_ = !isHttps_;
+		start();
+	}
 	request_ = Request::Parse(buffer_.data());
         std::string uri = request_->uri();
 	std::string cur_prefix = uri;
@@ -223,7 +219,7 @@ server::server(const std::string& sconfig_path)
 		context_.set_password_callback(boost::bind(&server::get_password, this));
 		context_.use_certificate_chain_file(config->GetCertFilePath());
 		context_.use_private_key_file(config->GetKeyFilePath(), boost::asio::ssl::context::pem);
-		context_.use_tmp_dh_file("dh2048.pem");
+		context_.use_tmp_dh_file(config->GetTmpDhFilePath());
 	}
 
 	InitHandlers();
@@ -271,20 +267,20 @@ server::~server() {
 }
 
 void server::run() {
-	/*threads_.clear();
+	threads_.clear();
 	for(int c = 1; c < config->GetThreadPoolSize(); c++) {
 		threads_.emplace_back([this]() {
 			io_service_.run();
 		});
-	}*/
+	}
 
-	//if(config->GetThreadPoolSize() > 0)
+	if(config->GetThreadPoolSize() > 0)
 		io_service_.run();
 	
 	
-	/*for(auto& t: threads_) {
+	for(auto& t: threads_) {
 		t.join();
-	}*/
+	}
 
 }
 
@@ -306,7 +302,7 @@ void server::do_accept() {
 		}
 	}
 	catch (boost::system::error_code const &e) {
-		do_accept();//throw e;
+		throw e;
 	}
 }
 
@@ -336,7 +332,7 @@ void server::handle_accept(const boost::system::error_code& ec, connection* con)
 	}
 	else if (ec) 
 	{
-		do_accept();
+		throw ec;//do_accept();
 	}
 
 	do_accept();
@@ -362,7 +358,7 @@ void server::https_handle_accept(const boost::system::error_code& ec, connection
 	}
 	else
 	{
-		do_accept();
+		throw ec; //do_accept();
 	}
 }
 

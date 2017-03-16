@@ -7,6 +7,7 @@ cp Dockerfile.run deploy/
 cp -r files/ deploy/
 cp -r files1/ deploy/
 cp -r files2/ deploy/
+cp -r ssl_certificates/ deploy/ 2>/dev/null
 
 #build the binary
 docker build -t httpserver.build .
