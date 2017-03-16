@@ -25,8 +25,8 @@ class connection
   : public std::enable_shared_from_this<connection>
 {
 public:
-	connection(const connection&) = delete;
-	connection& operator=(const connection&) = delete;
+	//connection(const connection&) = delete;
+	//connection& operator=(const connection&) = delete;
 	explicit connection(boost::asio::ip::tcp::socket socket, boost::asio::io_service& io_service,
 		boost::asio::ssl::context& context, bool isHttps);
 	explicit connection(boost::asio::ip::tcp::socket socket);
@@ -37,8 +37,10 @@ public:
 private:
 	void do_read();
 	void do_write();
+	void handle_read(std::shared_ptr<connection>& self, boost::system::error_code ec, std::size_t bytes);
+	void handle_write(std::shared_ptr<connection>& self, boost::system::error_code ec, std::size_t bytes);
 	void handle_read(boost::system::error_code ec, std::size_t bytes);
-	void handle_write(boost::system::error_code ec, std::size_t bytes);
+	void handle_write( boost::system::error_code ec, std::size_t bytes);
 
 	boost::asio::ip::tcp::socket socket_;
 	
@@ -56,6 +58,9 @@ public:
 	server& operator=(const server&) = delete;
 	explicit server(const std::string& sconfig_path);
 	~server();
+	
+				std::string session_id_context;
+				bool set_session_id_context = false;
 	void run();
   
 private:
@@ -65,9 +70,9 @@ private:
 	boost::asio::ip::tcp::socket socket_;
 	std::string get_password() const;
 
-	void handle_accept(connection* con, const boost::system::error_code& ec);
-	void https_handle_accept(connection* con, const boost::system::error_code& ec);
-	void https_handle_handshake(connection* con, const boost::system::error_code& ec);
+	void handle_accept(const boost::system::error_code& ec, connection* con = nullptr);
+	void https_handle_accept(const boost::system::error_code& ec, connection* con = nullptr);
+	//void https_handle_handshake(connection* con, const boost::system::error_code& ec);
 
 	void InitHandlers();
 
