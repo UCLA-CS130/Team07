@@ -40,7 +40,7 @@ private:
 	void handle_read(std::shared_ptr<connection>& self, boost::system::error_code ec, std::size_t bytes);
 	void handle_write(std::shared_ptr<connection>& self, boost::system::error_code ec, std::size_t bytes);
 	void handle_read(boost::system::error_code ec, std::size_t bytes);
-	void handle_write( boost::system::error_code ec, std::size_t bytes);
+	void handle_write(boost::system::error_code ec, std::size_t bytes);
 
 	boost::asio::ip::tcp::socket socket_;
 	

@@ -29,10 +29,10 @@ connection::connection(boost::asio::ip::tcp::socket socket, boost::asio::io_serv
 	//TODO: fix nullptrs
  	: socket_(std::move(socket))
 {
-	if(isHttps_)
+	if(isHttps)
 		ssl_socket_ = new HTTPS(io_service, context);
 	isHttps_ = isHttps;
-	ssl_socket_->lowest_layer().connect({ {}, 8007 }); 
+	//ssl_socket_->lowest_layer().connect({ {}, 8007 }); 
 }
 
 connection::connection(boost::asio::ip::tcp::socket socket)
@@ -158,16 +158,16 @@ void connection::handle_read(std::shared_ptr<connection>& self, boost::system::e
 void connection::do_read() {
 
 	if(isHttps_)
-	 	ssl_socket_->async_read_some(boost::asio::buffer(buffer_),
+	 	ssl_socket_->async_read_some(boost::asio::buffer(buffer_,16384),
 					boost::bind(&connection::handle_read, this, boost::asio::placeholders::error, boost::asio::placeholders::bytes_transferred));
 	else 
-		{
+	{
 		auto self(shared_from_this());
 		socket_.async_read_some(boost::asio::buffer(buffer_),
 					boost::bind(&connection::handle_read, this, self, boost::asio::placeholders::error, boost::asio::placeholders::bytes_transferred));
 
 	
-}
+	}
 }
 
 void connection::do_write() {
@@ -176,7 +176,8 @@ void connection::do_write() {
 	if(isHttps_)
 		boost::asio::async_write(*ssl_socket_, response_.to_buffers(),
 					 boost::bind(&connection::handle_write, this, boost::asio::placeholders::error, boost::asio::placeholders::bytes_transferred));
-	else {
+	else 
+	{
 		auto self(shared_from_this());
 		boost::asio::async_write(socket_, response_.to_buffers(),
 					 boost::bind(&connection::handle_write, this, self, boost::asio::placeholders::error, boost::asio::placeholders::bytes_transferred));
@@ -205,7 +206,7 @@ void connection::handle_write(std::shared_ptr<connection>& self, boost::system::
 // SERVER CONNECTION RELATED FUNCTIONS
 
 server::server(const std::string& sconfig_path)
-  : io_service_(), acceptor_(io_service_), socket_(io_service_), context_(boost::asio::ssl::context::sslv23)
+  : io_service_(), acceptor_(io_service_),socket_(io_service_), context_(boost::asio::ssl::context::sslv23)
 {
 	config = new ServerConfig(sconfig_path);
 
@@ -270,13 +271,6 @@ server::~server() {
 }
 
 void server::run() {
-
-	if(set_session_id_context) 
-			{
-				session_id_context = std::to_string(config->GetPortNo()) + "localhost";
-				SSL_CTX_set_session_id_context(context_.native_handle(), reinterpret_cast<const unsigned char*>(session_id_context.data()),
-				std::min<size_t>(session_id_context.size(), SSL_MAX_SSL_SESSION_ID_LENGTH));
-		    }
 	/*threads_.clear();
 	for(int c = 1; c < config->GetThreadPoolSize(); c++) {
 		threads_.emplace_back([this]() {
@@ -360,8 +354,8 @@ void server::https_handle_accept(const boost::system::error_code& ec, connection
 
 	if (!ec)
 	{
-		boost::asio::ip::tcp::no_delay option(true);
-        	con->ssl_socket_->lowest_layer().set_option(option);
+		//boost::asio::ip::tcp::no_delay option(true);
+        	//con->ssl_socket_->lowest_layer().set_option(option);
 
 		con->ssl_socket_->async_handshake(boost::asio::ssl::stream_base::server, 
 					boost::bind(&server::handle_accept, this, boost::asio::placeholders::error, con));
