@@ -82,6 +82,7 @@ private:
 
 	boost::asio::ssl::context context_;
 };
+
 } // namespace server
 } // namespace http
 

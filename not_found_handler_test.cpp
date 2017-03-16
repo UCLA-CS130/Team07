@@ -6,31 +6,31 @@
 #include <string>
 #include <limits.h>
 #include <unistd.h>
+
 namespace http {
-namespace server {
+	namespace server {
 
-TEST(NotFoundHandlerTest, SimpleTest) {
-	Request req;
-	Response resp;
-	NotFoundHandler not_found_handler;
-	NginxConfig conf;
-	ASSERT_EQ(not_found_handler.Init("", conf), RequestHandler::Status::OK);
-	
+			TEST(NotFoundHandlerTest, SimpleTest) {
+				Request req;
+				Response resp;
+				NotFoundHandler not_found_handler;
+				NginxConfig conf;
+				ASSERT_EQ(not_found_handler.Init("", conf), RequestHandler::Status::OK);
+				
 
-	const char text[] =
-		"HTTP/1.1 404 Not Found\r\n"
-		"Content-Length: 85\r\n"
-		"Content-Type: text/html\r\n" 
-		"<html>"
-  		"<head><title>Not Found</title></head>"
-  		"<body><h1>404 Not Found</h1></body>"
-  		"</html>";
-  	std::string body = text;
+				const char text[] =
+					"HTTP/1.1 404 Not Found\r\n"
+					"Content-Length: 85\r\n"
+					"Content-Type: text/html\r\n" 
+					"<html>"
+			  		"<head><title>Not Found</title></head>"
+			  		"<body><h1>404 Not Found</h1></body>"
+			  		"</html>";
+			  	std::string body = text;
 
-  	ASSERT_EQ(not_found_handler.HandleRequest(req, &resp), RequestHandler::Status::not_found);
-	
-	EXPECT_EQ(body, resp.ToString());
-}
-
-}
+			  	ASSERT_EQ(not_found_handler.HandleRequest(req, &resp), RequestHandler::Status::not_found);
+				
+				EXPECT_EQ(body, resp.ToString());
+			}
+	}
 }

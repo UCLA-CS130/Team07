@@ -43,7 +43,7 @@ webserver_test:
 #-I /usr/include/boost/ 
 
 clean:
-	rm -rf *.o webserver webserver_test
+	rm -rf *.o *.gcov *.gcda *.gcno webserver webserver_test
 
 integration:
 	make clean && make

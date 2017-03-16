@@ -5,30 +5,29 @@
 #include "request_handler.hpp"
 
 namespace http {
-namespace server {
+    namespace server {
 
-class ServerStats {
-public:
-    static ServerStats& getInstance();
+        class ServerStats {
+            public:
+                static ServerStats& getInstance();
 
-    void insertHandler(const std::string& prefix, const std::string& handler_name);
-    void insertRequest(const std::string& url, Response::ResponseCode response);
-    int getNumRequests();
-    void clearAllEntries();
+                void insertHandler(const std::string& prefix, const std::string& handler_name);
+                void insertRequest(const std::string& url, Response::ResponseCode response);
+                int getNumRequests();
+                void clearAllEntries();
 
-    std::vector<std::pair<std::string, std::string>> getHandlers() const;
-    std::vector<std::pair<std::string, Response::ResponseCode>> getRequests() const;
+                std::vector<std::pair<std::string, std::string>> getHandlers() const;
+                std::vector<std::pair<std::string, Response::ResponseCode>> getRequests() const;
 
-    boost::mutex sync_mutex;
+                boost::mutex sync_mutex;
 
-private:
-    ServerStats() {} 
+            private:
+                ServerStats() {} 
 
-    std::vector<std::pair<std::string, std::string>> handlers_;        
-    std::vector<std::pair<std::string, Response::ResponseCode>> requests_;
-};
-
-}
+                std::vector<std::pair<std::string, std::string>> handlers_;        
+                std::vector<std::pair<std::string, Response::ResponseCode>> requests_;
+        };
+    }
 }
 
 #endif // SERVER_STATS_H

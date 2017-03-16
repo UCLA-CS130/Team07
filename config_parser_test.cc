@@ -37,7 +37,8 @@ TEST(NginxConfigTest, EmptyTest) {
 
 class NginxStringConfigTest : public ::testing::Test {
 protected:
-	bool ParseString(const std::string config_string){
+	bool ParseString(const std::string config_string) 
+	{
 		std::stringstream config_stream(config_string);
 		return parser_.Parse(&config_stream, &out_config_);
 	}

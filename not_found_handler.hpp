@@ -4,18 +4,18 @@
 #include "request_handler.hpp"
 
 namespace http {
-namespace server {
-class NotFoundHandler: public RequestHandler {
-public:
-	Status HandleRequest(const Request &request, Response* response);	
-	Status Init(const std::string& uri_prefix, const NginxConfig& config);
+	namespace server {
+		class NotFoundHandler: public RequestHandler {
+			public:
+				Status HandleRequest(const Request &request, Response* response);	
+				Status Init(const std::string& uri_prefix, const NginxConfig& config);
 
-	~NotFoundHandler(){}
-};
+				~NotFoundHandler(){}
+			};
 
-REGISTER_REQUEST_HANDLER(NotFoundHandler);
+			REGISTER_REQUEST_HANDLER(NotFoundHandler);
 
-}
+	}
 }
 
 #endif // NOT_FOUND_HANDLER_HPP

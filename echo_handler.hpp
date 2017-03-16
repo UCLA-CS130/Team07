@@ -6,18 +6,18 @@
 #include "request_handler.hpp"
 
 namespace http {
-namespace server {
-class echo_handler: public RequestHandler {
-public:
-	Status HandleRequest(const Request &request, Response* response);	
-	Status Init(const std::string& uri_prefix, const NginxConfig& config);
+	namespace server {
+		class echo_handler: public RequestHandler {
+			public:
+				Status HandleRequest(const Request &request, Response* response);	
+				Status Init(const std::string& uri_prefix, const NginxConfig& config);
 
-	~echo_handler(){}
-};
+				~echo_handler(){}
+		};
 
-REGISTER_REQUEST_HANDLER(echo_handler);
+		REGISTER_REQUEST_HANDLER(echo_handler);
 
-}
+	}
 }
 
 #endif // ECHO_HANDLER_HPP

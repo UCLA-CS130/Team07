@@ -34,33 +34,34 @@ TEST(ReplyTest, HeaderVector) {
 }
 
 class ReplyHeaderTest : public ::testing::Test {
-protected:
-	bool AnalyzeHeader(std::string rcontent){
-		reply_.status = http::server::reply::not_found;
-		reply_.content = rcontent;
-		buffers = reply_.to_buffers();
-		if (reply_.headers.size() == 0) {
-			return true;
+	protected:
+		bool AnalyzeHeader(std::string rcontent) {
+			reply_.status = http::server::reply::not_found;
+			reply_.content = rcontent;
+			buffers = reply_.to_buffers();
+			if (reply_.headers.size() == 0)
+			{
+				return true;
+			}
+			return false;	
 		}
-		return false;	
 
-	}
-	void loadHeader() {
-		reply_.status = http::server::reply::ok;
-		reply_.content = "Test content";
-		head1_.name = "Content-Length";
-		head1_.value = std::to_string(reply_.content.size());
-		reply_.headers.push_back(head1_);
+		void loadHeader() {
+			reply_.status = http::server::reply::ok;
+			reply_.content = "Test content";
+			head1_.name = "Content-Length";
+			head1_.value = std::to_string(reply_.content.size());
+			reply_.headers.push_back(head1_);
 
-		head2_.name = "Content-Type";
-		head2_.value = "text/plain";
-		reply_.headers.push_back(head2_);
+			head2_.name = "Content-Type";
+			head2_.value = "text/plain";
+			reply_.headers.push_back(head2_);
 
-		buffers = reply_.to_buffers();
-	}
-	http::server::reply reply_;
-	http::server::header head1_, head2_;
-	std::vector<boost::asio::const_buffer> buffers;
+			buffers = reply_.to_buffers();
+		}
+		http::server::reply reply_;
+		http::server::header head1_, head2_;
+		std::vector<boost::asio::const_buffer> buffers;
 };
 
 TEST_F(ReplyHeaderTest, HeaderParsing) {
