@@ -1,4 +1,4 @@
-port 8080;
+port 8081;
 thread_pool_size 1;
 
 #comment
@@ -18,7 +18,7 @@ path /proxy ProxyHandler {
     root www.ucla.edu;
 }
 
-https off {
+https on {
 	certification_file_path ssl_certificates/server.crt;
 	key_file_path ssl_certificates/server.key;
 	tmp_dh_file_path ssl_certificates/dh2048.pem;

@@ -20,11 +20,20 @@ test: | clean webserver_test
 build_image:
 	./build_image.sh
 
+build_image_https:
+	./build_image_https.sh
+
 run_image:
 	docker run --rm -t -p 8080:8080 httpserver
 
+run_image_https:
+	docker run --rm -t -p 8081:8081 httpsserver
+
 deploy:
 	./deploy.sh
+
+deployHttps:
+	./deploy_https.sh
 
 run:
 	./webserver config
