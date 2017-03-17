@@ -18,7 +18,7 @@ path /proxy ProxyHandler {
 	root www.ucla.edu;
 }
 
-path / SpaceteamProxyHandler {
+path /proxy_spaceteam SpaceteamProxyHandler {
 	host www.ucla.edu;
 	proxy_port 80;
 }
@@ -26,4 +26,5 @@ path / SpaceteamProxyHandler {
 https on {
 	certification_file_path server.crt;
 	key_file_path server.key;
+	tmp_dh_file_path dh2048.pem;
 }
