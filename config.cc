@@ -23,6 +23,7 @@ const char* HTTPS_TOKEN = "https";
 const char* CERT_FILE_TOKEN = "certification_file_path";
 const char* KEY_FILE_TOKEN = "key_file_path";
 const char* THREAD_POOL_SIZE_TOKEN = "thread_pool_size";
+const char* TMP_DH_FILE_TOKEN = "tmp_dh_file_path";
 
 ServerConfig::ServerConfig(const std::string& configFilePath) {
 	NginxConfigParser config_parser;
@@ -37,6 +38,9 @@ int ServerConfig::GetPortNo() {
 }
 
 int ServerConfig::GetThreadPoolSize() {
+	if(threadPoolSize <= 0)
+		return 1;
+
 	return threadPoolSize;
 }
 
@@ -50,6 +54,10 @@ std::string ServerConfig::GetCertFilePath() {
 
 std::string ServerConfig::GetKeyFilePath() {
 	return keyFilePath;
+}
+
+std::string ServerConfig::GetTmpDhFilePath() {
+	return tmpDhFilePath;
 }
 
 boost::unordered_map<std::string, Path*>& ServerConfig::GetPaths() {
@@ -114,14 +122,10 @@ bool ServerConfig::ParseStatement(std::shared_ptr<NginxConfigStatement> statemen
 	} 
 	else if(statement->tokens_[0].compare(HTTPS_TOKEN) == 0)
 	{
-		if(statement->tokens_[1].compare("on"))
-		{
+		if(statement->tokens_[1].compare("on") == 0)
 			https = true;
-		}
-		else if (statement->tokens_[1].compare("off"))
-		{
+		else if (statement->tokens_[1].compare("off") == 0)
 			https = false;
-		}
 		else
 		{
 			std::cerr << "No or invalid HTTPS condition specified." << std::endl;
@@ -199,6 +203,11 @@ bool ServerConfig::ParseStatement(std::shared_ptr<NginxConfigStatement> statemen
 	else if (statement->tokens_[0].compare(KEY_FILE_TOKEN) == 0)
 	{
 		keyFilePath = statement->tokens_[1];
+		return true;
+	}
+	else if (statement->tokens_[0].compare(TMP_DH_FILE_TOKEN) == 0)
+	{
+		tmpDhFilePath = statement->tokens_[1];
 		return true;
 	}
 	return false;

@@ -23,8 +23,8 @@ path /proxy_spaceteam SpaceteamProxyHandler {
 	proxy_port 80;
 }
 
-https off {
-	certification_file_path ssl_certificates/server.crt;
-	key_file_path ssl_certificates/server.key;
-	tmp_dh_file_path ssl_certificates/dh2048.pem;
+https on {
+	certification_file_path server.crt;
+	key_file_path server.key;
+	tmp_dh_file_path dh2048.pem;
 }

@@ -1,29 +1,24 @@
-port 8007;
+port 8081;
 thread_pool_size 1;
 
 #comment
 path /echo echo_handler {}
 path /static1 file_handler {
-	root files;
+  root files;
 }
 path /static2 file_handler {
-	#comment
-	root files1;
+#comment
+  root files1;
 }
 path /status StatusHandler {}
 
 default NotFoundHandler {}
 
 path /proxy ProxyHandler {
-	root www.ucla.edu;
+    root www.ucla.edu;
 }
 
-path /proxy_spaceteam SpaceteamProxyHandler {
-	host www.ucla.edu;
-	proxy_port 80;
-}
-
-https off {
+https on {
 	certification_file_path ssl_certificates/server.crt;
 	key_file_path ssl_certificates/server.key;
 	tmp_dh_file_path ssl_certificates/dh2048.pem;

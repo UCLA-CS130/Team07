@@ -67,6 +67,7 @@ class ServerConfig {
 		std::pair<std::string, Path*> defaultpath;
 		std::string certFilePath;
 		std::string keyFilePath;
+		std::string tmpDhFilePath;
 
  	public:
 		ServerConfig(const std::string& configFilePath);
@@ -81,6 +82,7 @@ class ServerConfig {
 		bool IsHttps();
 		std::string GetCertFilePath();
 		std::string GetKeyFilePath();
+		std::string GetTmpDhFilePath();
 
 };
 

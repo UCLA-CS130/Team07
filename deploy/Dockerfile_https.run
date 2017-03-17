@@ -4,4 +4,4 @@ WORKDIR /opt/httpserver
 COPY . /opt/httpserver
 
 EXPOSE 8080:8081
-CMD ["./webserver", "config_deploy"]
+CMD ["./webserver", "config_deploy_https"]

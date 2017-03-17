@@ -5,6 +5,9 @@ Welcome to our Simple Robust Webserver!
 What is this project?
 - It's a simple webserver that has configurable parameters that are fed in via and Nginx-like config file. Currently, the server can handle file and echo requests.
 
+HTTPS encryption:
+Our server requires an additional library to support HTTPS encryption. This library can be installed using the following command:
+	sudo apt-get install libssl-dev
 
 Code Layout and Design? What's where?
 

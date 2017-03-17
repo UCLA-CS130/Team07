@@ -1,4 +1,6 @@
 port 8080;
+thread_pool_size 1;
+
 #comment
 path /echo echo_handler {}
 path /static1 file_handler {
@@ -14,4 +16,10 @@ default NotFoundHandler {}
 
 path /proxy ProxyHandler {
     root www.ucla.edu;
+}
+
+https off {
+	certification_file_path ssl_certificates/server.crt;
+	key_file_path ssl_certificates/server.key;
+	tmp_dh_file_path ssl_certificates/dh2048.pem;
 }
