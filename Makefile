@@ -39,7 +39,7 @@ run:
 	./webserver config
 
 run_https:
-	./webserver config_https
+	./webserver httpsconfig
 
 run_coverage:
 	./webserver_test
