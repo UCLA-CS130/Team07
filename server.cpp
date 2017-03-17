@@ -49,9 +49,11 @@ namespace http {
 
 		void connection::stop() {
 			socket_.close();
-			delete(ssl_socket_);
 			if(isHttps_)
+			{
+				delete(ssl_socket_);
 				delete(this);
+			}
 		}
 
 		void connection::handle_read(boost::system::error_code ec, std::size_t bytes)
@@ -103,49 +105,7 @@ namespace http {
 
 		void connection::handle_read(std::shared_ptr<connection>& self, boost::system::error_code ec, std::size_t bytes)
 		{
-			request_ = Request::Parse(buffer_.data());
-			std::string uri = request_->uri();
-			std::string cur_prefix = uri;
-		
-			while((*handlers_)[cur_prefix] == nullptr && cur_prefix.compare("/")!=0 && !cur_prefix.empty())
-			{ 
-		
-				if(!cur_prefix.empty() && cur_prefix.back() == '/')
-					cur_prefix.pop_back();
-		
-				if((*handlers_)[cur_prefix] != nullptr)
-					break;
-
-				while(!cur_prefix.empty() && cur_prefix.back() != '/')
-					cur_prefix.pop_back();
-			}
-	
-			// assign request to proxy handler if referer field exists
-			for (auto pair : request_->headers()) {
-				if (pair.first == "Referer") {
-					auto ref_uri = pair.second.find_last_of("/");
-					cur_prefix = pair.second.substr(ref_uri);
-				}
-			}
-
-			if((*handlers_)[cur_prefix] != nullptr)
-			{       
-				(*handlers_)[cur_prefix]->HandleRequest(*request_, &response_);
-				{		
-					boost::unique_lock<boost::mutex> lock(ServerStats::getInstance().sync_mutex);
-					ServerStats::getInstance().insertRequest(cur_prefix, response_.getResponseCode());
-				} //lock object destroyed => mutex unlocked
-		
-			}
-			else 
-			{
-				(*handlers_)["default"]->HandleRequest(*request_, &response_);
-				{	
-					boost::unique_lock<boost::mutex> lock(ServerStats::getInstance().sync_mutex);
-					ServerStats::getInstance().insertRequest("default", response_.getResponseCode());
-				} //lock object destroyed => mutex unlocked
-			}
-			do_write();
+			handle_read(ec, bytes);
 		}
 
 		void connection::do_read() {
@@ -193,11 +153,7 @@ namespace http {
 
 		void connection::handle_write(std::shared_ptr<connection>& self, boost::system::error_code ec, std::size_t bytes)
 		{
-			if (!ec)
-			{
-				boost::system::error_code ignored_ec;
-				stop();
-			}
+			handle_write(ec, bytes);
 		}
 
 		// SERVER CONNECTION RELATED FUNCTIONS
